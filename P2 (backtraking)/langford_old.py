@@ -7,18 +7,21 @@ def langford_directo(N, allsolutions):
     
     def is_feasible(s):
         for n in range(1,N+1):
-            if n in s:
-                i = s.index(n)
-                if i+1+n >= len(s) or (i+1+n < len(s) and s[i] != s[i+1+n]):
-                    return False
+            if n not in s:
+                return False
+            i = s.index(n)
+            if i+1+n >= len(s) or (i+1+n < len(s) and s[i] != s[i+1+n]):
+                return False
         return True
         
     def is_complete(s):
-        if 0 in s: return False
-        for n in range(1,N+1):
-            if n not in s: return False
-            else: return True
-    
+        result = True
+        for n in s:
+            if n == 0:
+                result = False
+                break
+        return result
+        
     def branch(s):
         result = []
         i = s.index(0)
@@ -27,24 +30,30 @@ def langford_directo(N, allsolutions):
                 result.append((n, i, i+1+n))
         return result
     
+    def backtrack(s):
+        if is_complete(s):
+            if is_feasible(s):
+                return [s]
+        else:
+            result = None
+            for p in branch(s):
+                if p[1] < len(s) and p[2] < len(s) and s[p[1]] == 0 and s[p[2]] == 0:
+                    sa = s.copy()
+                    sa[p[1]] = p[0]
+                    sa[p[2]] = p[0]
+                    r = backtrack(sa)
+                    if r != None:
+                        if result == None: result = []
+                        result.extend(r)
+            return result
+    
     def backtracking(num):
         if num<=0:
             yield "-".join(map(str, seq))
         else:
-            for i in range(0,2*N+1):
-                if i+num+1 < len(seq) and seq[i] == 0 and seq[i+num+1] == 0:
-                    seq[i] = num
-                    seq[i+num+1] = num
-                    if is_feasible(seq):
-                        if is_complete(seq):
-                            yield next(backtracking(0))
-                        else:
-                            for sol in backtracking(num - 1):
-                                yield sol
-                    seq[i] = 0
-                    seq[i+num+1] = 0
-                
-                
+	    # COMPLETAR
+            for s in backtrack(seq):
+                yield s
 
     if N%4 not in (0,3):
         yield "no hay solucion"
@@ -104,7 +113,7 @@ def langford_data_structure(N):
         while ih+1+v < 2*N:
             Y[value(v) + position(ih)] = [value(v), position(ih), position(ih+1+v)]
             ih = ih + 1
-                        
+
     X = {j: set() for j in X}
     for i in Y:
         for j in Y[i]:
