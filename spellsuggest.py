@@ -1,6 +1,7 @@
 import re
 
 from trie import Trie
+from distancias_mejoradas import Distances
 
 class SpellSuggester:
 
@@ -54,7 +55,22 @@ class SpellSuggester:
         assert distance in ["levenshtein", "restricted", "intermediate"]
 
         results = {} # diccionario termino:distancia
-        # TODO
+        distanceFunc = None
+        if distance == "levenshtein":
+            distanceFunc = Distances.levenshtein
+        elif distance == "restricted":
+            distanceFunc = Distances.damerau_levenshtein_restringida
+        else:
+            distanceFunc = Distances.damerau_levenshtein_intermedia
+        
+        for word in self.vocabulary:
+            if threshold == None:
+                results[word] = distanceFunc(term, word)
+            else:
+                d = distanceFunc(term, word, threshold)
+                if d != None and d <= threshold:
+                    results[word] = d
+        
         return results
 
 class TrieSpellSuggester(SpellSuggester):
@@ -66,8 +82,13 @@ class TrieSpellSuggester(SpellSuggester):
         self.trie = Trie(self.vocabulary)
     
 if __name__ == "__main__":
-    spellsuggester = TrieSpellSuggester("./corpora/quijote.txt")
-    print(suggester.suggest("alábese"))
+    spellsuggester = TrieSpellSuggester("./data/quijote.txt")
+    test = {"casa"}
+    for t in test:
+        for i in range(1,6):
+            result = spellsuggester.suggest("casa", "intermediate", i)
+            print(t + "\t" + str(i) + "\t" + str(len(result)) + "\t" + "\n")
+        
     # cuidado, la salida es enorme print(suggester.trie)
 
     

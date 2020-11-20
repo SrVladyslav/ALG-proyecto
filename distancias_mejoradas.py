@@ -2,16 +2,16 @@ import numpy as np
 import math
 
 class Distances:
-    def levenshtein(x, y, threshold):
+    def levenshtein(x, y, threshold=2**31):
         M = np.ones((len(x) + 1, len(y) + 1))*np.inf
         for i in range(0, len(x) + 1):
             M[i, 0] = i
         for j in range(0, len(y) + 1):
             M[0, j] = j
-        m = len(x)/len(y)
+        m = len(y)/len(x)
         for i in range(1, len(x) + 1):
             colMin = np.inf;
-            for j in range(max(math.floor(m*i-threshold), 1), min(math.ceil(m*i+threshold), len(y) + 1)):
+            for j in range(max(math.floor(m*i-threshold), 1), min(math.ceil(m*i+threshold)+1, len(y) + 1)):
                 if x[i - 1] == y[j - 1]:
                     M[i, j] = min(M[i - 1, j] + 1, M[i, j - 1] + 1, M[i-1][j-1])
                 else:
@@ -22,16 +22,16 @@ class Distances:
                 return None
         return M[len(x), len(y)]
         
-    def damerau_levenshtein_restringida(x, y, threshold):
+    def damerau_levenshtein_restringida(x, y, threshold=2**31):
         M = np.ones((len(x) + 1, len(y) + 1))*np.inf
         for i in range(0, len(x) + 1):
             M[i, 0] = i
         for j in range(0, len(y) + 1):
             M[0, j] = j
-        m = len(x)/len(y)
+        m = len(y)/len(x)
         for i in range(1, len(x) + 1):
             colMin = np.inf;
-            for j in range(max(math.floor(m*i-threshold), 1), min(math.ceil(m*i+threshold), len(y) + 1)):
+            for j in range(max(math.floor(m*i-threshold), 1), min(math.ceil(m*i+threshold)+1, len(y) + 1)):
                 if i > 1 and j > 1 and x[i - 2] == y[j - 1] and x[i - 1] == y[j - 2]:
                     if x[i - 1] == y[j - 1]:
                         M[i, j] = min(M[i - 1, j] + 1, M[i, j - 1] + 1, M[i-1][j-1], M[i-2][j-2] + 1)
@@ -48,16 +48,16 @@ class Distances:
                 return None
         return M[len(x), len(y)]
         
-    def damerau_levenshtein_intermedia(x, y,threshold):
+    def damerau_levenshtein_intermedia(x, y,threshold=2**31):
         M = np.ones((len(x) + 1, len(y) + 1))*np.inf
         for i in range(0, len(x) + 1):
             M[i, 0] = i
         for j in range(0, len(y) + 1):
             M[0, j] = j
-        m = len(x)/len(y)
+        m = len(y)/len(x)
         for i in range(1, len(x) + 1):
             colMin = np.inf;
-            for j in range(max(math.floor(m*i-threshold), 1), min(math.ceil(m*i+threshold), len(y) + 1)):
+            for j in range(max(math.floor(m*i-threshold), 1), min(math.ceil(m*i+threshold)+1, len(y) + 1)):
                 minInit = 0
                 if x[i - 1] == y[j - 1]:
                     minInit = min(M[i-1, j] + 1, M[i, j-1] + 1, M[i-1][j-1])
@@ -65,13 +65,15 @@ class Distances:
                     minInit = min(M[i-1, j] + 1, M[i, j-1] + 1, M[i-1][j-1] + 1)
 
                 if j > 1 and i > 1 and x[i - 2] == y[j - 1] and x[i - 1] == y[j - 2]:
-                    M[i,j] = min(minInit, M[i-2][j-2] + 1)
-                elif j > 2 and i > 1 and x[i-2] == y[j-1] and x[i-1] == y[j-3]:
-                    M[i,j] = min(minInit, M[i-2][j-3] + 2)
-                elif i > 2 and j > 1 and x[i - 3] == y[j-1] and x[i-1] == y[j-2]:
-                    M[i,j] = min(minInit, M[i-3][j-2] + 2)
-                else:
-                    M[i,j] = minInit
+                    minInit = min(minInit, M[i-2][j-2] + 1)
+                
+                if j > 2 and i > 1 and x[i-2] == y[j-1] and x[i-1] == y[j-3]:
+                    minInit = min(minInit, M[i-2][j-3] + 2)
+                
+                if i > 2 and j > 1 and x[i - 3] == y[j-1] and x[i-1] == y[j-2]:
+                    minInit = min(minInit, M[i-3][j-2] + 2)
+                
+                M[i,j] = minInit
                 if colMin > M[i,j]:
                     colMin = M[i,j]
             if colMin > threshold:
