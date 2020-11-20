@@ -83,11 +83,14 @@ class TrieSpellSuggester(SpellSuggester):
     
 if __name__ == "__main__":
     spellsuggester = TrieSpellSuggester("./data/quijote.txt")
+    print(Distances.damerau_levenshtein_intermedia("casa","",4))
     test = {"casa"}
     for t in test:
-        for i in range(1,6):
+        for i in range(4,5):
             result = spellsuggester.suggest("casa", "intermediate", i)
-            print(t + "\t" + str(i) + "\t" + str(len(result)) + "\t" + "\n")
+            print("" in result)
+            
+                
         
     # cuidado, la salida es enorme print(suggester.trie)
 

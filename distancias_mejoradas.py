@@ -58,7 +58,7 @@ class Distances:
         for i in range(1, len(x) + 1):
             colMin = np.inf;
             for j in range(max(math.floor(m*i-threshold), 1), min(math.ceil(m*i+threshold)+1, len(y) + 1)):
-                minInit = 0
+                minInit = 2**31
                 if x[i - 1] == y[j - 1]:
                     minInit = min(M[i-1, j] + 1, M[i, j-1] + 1, M[i-1][j-1])
                 else:
@@ -76,6 +76,7 @@ class Distances:
                 M[i,j] = minInit
                 if colMin > M[i,j]:
                     colMin = M[i,j]
+            
             if colMin > threshold:
                 return None
         return M[len(x), len(y)]
