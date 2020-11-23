@@ -33,7 +33,7 @@ class SpellSuggester:
             vocab_file (str): ruta del fichero de texto para cargar el vocabulario.
             tokenizer (re.Pattern): expresión regular para la tokenización.
         """
-        with open(vocab_file_path, "r") as fr:
+        with open(vocab_file_path, "r", encoding='utf-8') as fr:
             vocab = set(tokenizer.split(fr.read().lower()))
             vocab.discard('') # por si acaso
             return sorted(vocab)
