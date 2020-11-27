@@ -82,13 +82,15 @@ class Distances:
                 return None
         return M[len(x), len(y)]
         
-    def levenshtein_trie(t, y, threshold):
+    """ Implementaciones trie """
+        
+    def levenshtein_trie(t, y, threshold=2**31):
         M = np.ones((t.get_num_states() + 1, len(y) + 1))*np.inf
         M[0,0] = 0
         for i in range(1, t.get_num_states() + 1):
-            M[i, 0] = M[t.get_parent(i), 0] + 1;
+            M[i, 0] = M[t.get_parent(i), 0] + 1
         for j in range(1, len(y) + 1):
-            M[0, j] = M[0, j - 1] + 1;
+            M[0, j] = M[0, j - 1] + 1
             
         for i in range(1, t.get_num_states() + 1):
             for j in range(1, len(y) + 1):
@@ -99,7 +101,57 @@ class Distances:
         
         result = [(i, M[i, len(y)]) for i in range(0, t.get_num_states() + 1) if M[i, len(y)] <= threshold]
         return result
+        
+    def damerau_levenshtein_restringida_trie(t, y, threshold=2**31):
+        M = np.ones((t.get_num_states() + 1, len(y) + 1))*np.inf
+        M[0, 0] = 0
+        for i in range(1, t.get_num_states() + 1):
+            M[i, 0] = M[t.get_parent(i), 0] + 1
+        for j in range(1, len(y) + 1):
+            M[0, j] = M[0, j - 1] + 1
+        for i in range(1, t.get_num_states() + 1):
+            for j in range(1, len(y) + 1):
+                if i > 0 and j > 1 and t.get_label(t.get_parent(i)) == y[j - 1] and t.get_label(i) == y[j - 2]:
+                    if t.get_label(i) == y[j - 1]:
+                        M[i, j] = min(M[t.get_parent(i), j] + 1, M[i, j - 1] + 1, M[t.get_parent(i), j-1], M[t.get_parent(t.get_parent(i)), j-2] + 1)
+                    else:
+                        M[i, j] = min(M[t.get_parent(i), j] + 1, M[i, j - 1] + 1, M[t.get_parent(i), j-1] + 1, M[t.get_parent(t.get_parent(i)), j-2] + 1)
+                else:
+                    if t.get_label(i) == y[j - 1]:
+                        M[i, j] = min(M[t.get_parent(i), j] + 1, M[i, j - 1] + 1, M[t.get_parent(i), j-1])
+                    else:
+                        M[i, j] = min(M[t.get_parent(i), j] + 1, M[i, j - 1] + 1, M[t.get_parent(i), j-1] + 1)
+        
+        result = [(i, M[i, len(y)]) for i in range(0, t.get_num_states() + 1) if M[i, len(y)] <= threshold]
+        return result
                     
+    def damerau_levenshtein_intermedia_trie(t, y,threshold=2**31):
+        M = np.ones((t.get_num_states() + 1, len(y) + 1))*np.inf
+        M[0, 0] = 0
+        for i in range(1, t.get_num_states() + 1):
+            M[i, 0] = M[t.get_parent(i), 0] + 1
+        for j in range(1, len(y) + 1):
+            M[0, j] = M[0, j - 1] + 1
+        for i in range(1, t.get_num_states() + 1):
+            for j in range(1, len(y) + 1):
+                minInit = 2**31
+                if t.get_label(i) == y[j - 1]:
+                    minInit = min(M[t.get_parent(i), j] + 1, M[i, j-1] + 1, M[t.get_parent(i), j-1])
+                else:
+                    minInit = min(M[t.get_parent(i), j] + 1, M[i, j-1] + 1, M[t.get_parent(i), j-1] + 1)
+
+                if j > 1 and i > 1 and t.get_label(t.get_parent(i)) == y[j - 1] and t.get_label(i) == y[j - 2]:
+                    minInit = min(minInit, M[t.get_parent(t.get_parent(i)), j-2] + 1)
+                
+                if j > 2 and i > 1 and t.get_label(t.get_parent(i)) == y[j-1] and t.get_label(i) == y[j-3]:
+                    minInit = min(minInit, M[t.get_parent(t.get_parent(i)), j-3] + 2)
+                
+                if i > 2 and j > 1 and t.get_label(t.get_parent(t.get_parent(i))) == y[j-1] and t.get_label(i) == y[j-2]:
+                    minInit = min(minInit, M[t.get_parent(t.get_parent(t.get_parent(i))), j-2] + 2)
+                
+                M[i,j] = minInit
+        result = [(i, M[i, len(y)]) for i in range(0, t.get_num_states() + 1) if M[i, len(y)] <= threshold]
+        return result
 
 def test():
     x = "google"

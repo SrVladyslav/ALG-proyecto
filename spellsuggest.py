@@ -83,8 +83,19 @@ class TrieSpellSuggester(SpellSuggester):
         self.trie = Trie(self.vocabulary)
         
         
-    def suggest(self, term, threshold=2**31):
-        words = Distances.levenshtein_trie(self.trie, term, threshold)
+    def suggest(self, term, distance="levenshtein", threshold=2**31):
+    
+        assert distance in ["levenshtein", "restricted", "intermediate"]
+        
+        distanceFunc = None
+        if distance == "levenshtein":
+            distanceFunc = Distances.levenshtein_trie
+        elif distance == "restricted":
+            distanceFunc = Distances.damerau_levenshtein_restringida_trie
+        else:
+            distanceFunc = Distances.damerau_levenshtein_intermedia_trie
+        
+        words = distanceFunc(self.trie, term, threshold)
         result = {}
         for w,d in words:
             result[self.trie.get_output(w)] = d
@@ -97,11 +108,12 @@ if __name__ == "__main__":
     test = {"casa"}
     for t in test:
         for i in range(1,5):
-            result = spellsuggester.suggest("casa", "levenshtein", i)
-            resultT = spellsuggestertrie.suggest("casa", i)
+            result = spellsuggester.suggest("casa", "intermediate", i)
+            resultT = spellsuggestertrie.suggest("casa", "intermediate", i)
             print(len(result))
-            print(len(resultT)) """ Devuelve uno más ya que incluye la cadena vacia."""
+            print(len(resultT))
             print("-------------")
+            """ Devuelve uno más ya que incluye la cadena vacia."""
             
                 
         
