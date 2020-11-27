@@ -67,7 +67,7 @@ class SpellSuggester:
             if threshold == None:
                 results[word] = distanceFunc(term, word)
             else:
-                if len(word) > len(term) + threshold:
+                if len(word) <= len(term) + threshold:
                     d = distanceFunc(term, word, threshold)
                     if d != None and d <= threshold:
                         results[word] = d
@@ -81,15 +81,27 @@ class TrieSpellSuggester(SpellSuggester):
     def __init__(self, vocab_file_path):
         super().__init__(vocab_file_path)
         self.trie = Trie(self.vocabulary)
+        
+        
+    def suggest(self, term, threshold=2**31):
+        words = Distances.levenshtein_trie(self.trie, term, threshold)
+        result = {}
+        for w,d in words:
+            result[self.trie.get_output(w)] = d
+        return result
+        
     
 if __name__ == "__main__":
-    spellsuggester = TrieSpellSuggester("./data/quijote.txt")
-    print(Distances.damerau_levenshtein_intermedia("casa","",4))
+    spellsuggestertrie = TrieSpellSuggester("./data/quijote.txt")
+    spellsuggester = SpellSuggester("./data/quijote.txt")
     test = {"casa"}
     for t in test:
-        for i in range(4,5):
-            result = spellsuggester.suggest("casa", "intermediate", i)
-            print("" in result)
+        for i in range(1,5):
+            result = spellsuggester.suggest("casa", "levenshtein", i)
+            resultT = spellsuggestertrie.suggest("casa", i)
+            print(len(result))
+            print(len(resultT)) """ Devuelve uno más ya que incluye la cadena vacia."""
+            print("-------------")
             
                 
         

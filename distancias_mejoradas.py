@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from trie import Trie
 
 class Distances:
     def levenshtein(x, y, threshold=2**31):
@@ -80,6 +81,25 @@ class Distances:
             if colMin > threshold:
                 return None
         return M[len(x), len(y)]
+        
+    def levenshtein_trie(t, y, threshold):
+        M = np.ones((t.get_num_states() + 1, len(y) + 1))*np.inf
+        M[0,0] = 0
+        for i in range(1, t.get_num_states() + 1):
+            M[i, 0] = M[t.get_parent(i), 0] + 1;
+        for j in range(1, len(y) + 1):
+            M[0, j] = M[0, j - 1] + 1;
+            
+        for i in range(1, t.get_num_states() + 1):
+            for j in range(1, len(y) + 1):
+                if t.get_label(i) == y[j - 1]:
+                    M[i, j] = min(M[t.get_parent(i), j] + 1, M[i, j - 1] + 1, M[t.get_parent(i), j - 1])
+                else:
+                    M[i, j] = min(M[t.get_parent(i), j] + 1, M[i, j - 1] + 1, M[t.get_parent(i), j - 1] + 1)
+        
+        result = [(i, M[i, len(y)]) for i in range(0, t.get_num_states() + 1) if M[i, len(y)] <= threshold]
+        return result
+                    
 
 def test():
     x = "google"
