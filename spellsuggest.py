@@ -67,9 +67,10 @@ class SpellSuggester:
             if threshold == None:
                 results[word] = distanceFunc(term, word)
             else:
-                d = distanceFunc(term, word, threshold)
-                if d != None and d <= threshold:
-                    results[word] = d
+                if len(word) > len(term) + threshold:
+                    d = distanceFunc(term, word, threshold)
+                    if d != None and d <= threshold:
+                        results[word] = d
         
         return results
 
