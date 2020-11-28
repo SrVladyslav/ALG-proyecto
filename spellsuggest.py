@@ -65,12 +65,12 @@ class SpellSuggester:
         
         for word in self.vocabulary:
             if threshold == None:
-                results[word] = distanceFunc(term, word)
+                results[word] = int(distanceFunc(term, word))
             else:
                 if len(word) <= len(term) + threshold:
                     d = distanceFunc(term, word, threshold)
                     if d != None and d <= threshold:
-                        results[word] = d
+                        results[word] = int(d)
         
         return results
 
@@ -98,12 +98,12 @@ class TrieSpellSuggester(SpellSuggester):
         words = distanceFunc(self.trie, term, threshold)
         result = {}
         for w,d in words:
-            result[self.trie.get_output(w)] = d
+            result[self.trie.get_output(w)] = int(d)
         return result
         
     
 if __name__ == "__main__":
-    spellsuggestertrie = TrieSpellSuggester("./data/quijote.txt")
+    spellsuggestertrie = TrieSpellSuggester("./corpora/quijote.txt")
     spellsuggester = SpellSuggester("./data/quijote.txt")
     test = {"casa"}
     for t in test:
