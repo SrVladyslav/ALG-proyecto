@@ -73,6 +73,9 @@ class SpellSuggester:
                         results[word] = int(d)
         
         return results
+        
+    def changeVocabulary(self, new_vocabulary):
+        self.vocabulary = new_vocabulary
 
 class TrieSpellSuggester(SpellSuggester):
     """
