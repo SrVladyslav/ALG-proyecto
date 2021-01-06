@@ -20,27 +20,29 @@ if __name__ == "__main__":
     
     for t in [10, 100, 1000, 10000]:
         print("Size " + str(t))
-        testVoc = sorted([sorted_vocab[i] for i in range(0,t)])
+        testVoc = sorted([sorted_vocab[i] for i in range(t)]) # Distintas tallas del dicionario
         suggester.changeVocabulary(testVoc)
         trie_suggester.changeVocabulary(testVoc)
         
         funcs = ["levenshtein", "restricted", "intermediate"]
-        for f in range(0, len(funcs)):
-            print("\tFunction: " + funcs[f])
-            totalT = 0.0
-            for w in testVoc:
-                startT = time.process_time()
-                res = suggester.suggest(w, funcs[f], 4)
-                endT = time.process_time()
-                totalT += endT - startT
-            totalT /= len(w)
-            print("\t\t Normal version: t = " + str(totalT))
-            totalT = 0.0
-            for w in testVoc:
-                startT = time.process_time()
-                res = trie_suggester.suggest(w, funcs[f], 4)
-                endT = time.process_time()
-                totalT += endT - startT
-            totalT /= len(w)
-            print("\t\t Trie version: t = " + str(totalT))
-        
+        for th in [1,2,3,4,5]:                      # Distintos thresholds
+            print(f'Threshold está en : {th}')
+            for f in range(len(funcs)):
+                print("\tFunction: " + funcs[f])
+                totalT = 0.0
+                for w in testVoc:
+                    startT = time.process_time()
+                    res = suggester.suggest(w, funcs[f], threshold=th)
+                    endT = time.process_time()
+                    totalT += endT - startT
+                totalT /= len(w)
+                print("\t\t Normal version: t = " + str(totalT))
+                totalT = 0.0
+                for w in testVoc:
+                    startT = time.process_time()
+                    res = trie_suggester.suggest(w, funcs[f], threshold=th)
+                    endT = time.process_time()
+                    totalT += endT - startT
+                totalT /= len(w)
+                print("\t\t Trie version: t = " + str(totalT))
+       
